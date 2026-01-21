@@ -113,16 +113,11 @@ tr.linha-pendente{background:rgba(244,114,182,.12)}
   </div>
 </div>
 
-<!-- SCRIPT -->
 <script type="module">
-/* 🔴 TESTE OBRIGATÓRIO */
-alert("JS CARREGOU");
-
-/* FIREBASE */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* CONFIG */
+/* CONFIGURAÇÃO */
 function pedirConfig(){
   const cfg = {
     apiKey: prompt("Firebase apiKey"),
@@ -156,7 +151,7 @@ btnSalvar.addEventListener("click", salvar);
 
 /* SALVAR */
 async function salvar(){
-  alert("BOTÃO FUNCIONA");
+  if(!produto.value || !molecula.value || !dataEl.value) return;
 
   await addDoc(collection(db,"depara"),{
     codigo: codigo.value,
@@ -166,31 +161,33 @@ async function salvar(){
     data: dataEl.value
   });
 
-  alert("SALVO NO FIREBASE");
+  codigo.value = produto.value = molecula.value = dataEl.value = "";
+  statusEl.value = "Feito";
+
   render();
 }
 
-/* RENDER */
+/* LISTAR */
 async function render(){
   lista.innerHTML="";
   const snap = await getDocs(collection(db,"depara"));
 
   snap.forEach(d=>{
-    const r=d.data();
-    const tr=document.createElement("tr");
-    tr.className = r.status==="Feito" ? "linha-feito" : "linha-pendente";
+    const r = d.data();
+    const tr = document.createElement("tr");
+    tr.className = r.status === "Feito" ? "linha-feito" : "linha-pendente";
 
-    tr.innerHTML=`
-      <td>${r.codigo||""}</td>
-      <td>${r.produto||""}</td>
-      <td>${r.molecula||""}</td>
+    tr.innerHTML = `
+      <td>${r.codigo || ""}</td>
+      <td>${r.produto || ""}</td>
+      <td>${r.molecula || ""}</td>
       <td><span class="badge ${r.status==="Feito"?"feito":"pendente"}">${r.status}</span></td>
-      <td>${r.data||""}</td>
-      <td><button>🗑️</button></td>
+      <td>${r.data || ""}</td>
+      <td><button data-id="${d.id}">🗑️</button></td>
     `;
 
-    tr.querySelector("button").addEventListener("click",async()=>{
-      await deleteDoc(doc(db,"depara",d.id));
+    tr.querySelector("button").addEventListener("click", async ()=>{
+      await deleteDoc(doc(db,"depara", d.id));
       render();
     });
 
