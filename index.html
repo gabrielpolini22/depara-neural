@@ -29,21 +29,33 @@ tr.linha-pendente{background:rgba(244,114,182,.12)}
 <h1>NEURAL DE/PARA</h1>
 
 <div class="grid">
-<div class="card">
-<input id="codigo" placeholder="Código">
-<input id="produto" placeholder="Produto">
-<input id="molecula" placeholder="Molécula">
-<select id="status"><option>Feito</option><option>Pendente</option></select>
-<input type="date" id="data">
-<button onclick="salvar()">SALVAR</button>
-</div>
+  <div class="card">
+    <input id="codigo" placeholder="Código">
+    <input id="produto" placeholder="Produto">
+    <input id="molecula" placeholder="Molécula">
+    <select id="status">
+      <option>Feito</option>
+      <option>Pendente</option>
+    </select>
+    <input type="date" id="data">
+    <button id="btnSalvar">SALVAR</button>
+  </div>
 
-<div class="card">
-<table>
-<thead><tr><th>COD</th><th>PRODUTO</th><th>MOLÉCULA</th><th>STATUS</th><th>DATA</th><th></th></tr></thead>
-<tbody id="lista"></tbody>
-</table>
-</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>COD</th>
+          <th>PRODUTO</th>
+          <th>MOLÉCULA</th>
+          <th>STATUS</th>
+          <th>DATA</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="lista"></tbody>
+    </table>
+  </div>
 </div>
 
 <script type="module">
@@ -73,40 +85,56 @@ const molecula = document.getElementById("molecula");
 const statusEl = document.getElementById("status");
 const dataEl = document.getElementById("data");
 const lista = document.getElementById("lista");
+const btnSalvar = document.getElementById("btnSalvar");
+
+btnSalvar.addEventListener("click", salvar);
 
 async function salvar(){
-  if(!produto.value||!molecula.value||!dataEl.value)return;
+  if(!produto.value || !molecula.value || !dataEl.value){
+    alert("Preencha os campos obrigatórios");
+    return;
+  }
+
   await addDoc(collection(db,"depara"),{
-    codigo:codigo.value,
-    produto:produto.value,
-    molecula:molecula.value,
-    status:statusEl.value,
-    data:dataEl.value
+    codigo: codigo.value,
+    produto: produto.value,
+    molecula: molecula.value,
+    status: statusEl.value,
+    data: dataEl.value
   });
-  codigo.value=produto.value=molecula.value=dataEl.value="";
-  statusEl.value="Feito";
+
+  codigo.value = produto.value = molecula.value = dataEl.value = "";
+  statusEl.value = "Feito";
+
   render();
 }
 
 async function render(){
   lista.innerHTML="";
   const snap = await getDocs(collection(db,"depara"));
+
   snap.forEach(d=>{
-    const r=d.data();
-    const tr=document.createElement("tr");
-    tr.classList.add(r.status==="Feito"?"linha-feito":"linha-pendente");
-    tr.innerHTML=`
-      <td>${r.codigo||""}</td>
+    const r = d.data();
+    const tr = document.createElement("tr");
+    tr.className = r.status === "Feito" ? "linha-feito" : "linha-pendente";
+
+    tr.innerHTML = `
+      <td>${r.codigo || ""}</td>
       <td>${r.produto}</td>
       <td>${r.molecula}</td>
       <td><span class="badge ${r.status==="Feito"?"feito":"pendente"}">${r.status}</span></td>
       <td>${r.data}</td>
-      <td><button onclick="del('${d.id}')">🗑️</button></td>`;
+      <td><button data-id="${d.id}">🗑️</button></td>
+    `;
+
+    tr.querySelector("button").addEventListener("click", async ()=>{
+      await deleteDoc(doc(db,"depara", d.id));
+      render();
+    });
+
     lista.appendChild(tr);
   });
 }
-
-window.del = async id => { await deleteDoc(doc(db,"depara",id)); render(); }
 
 render();
 </script>
