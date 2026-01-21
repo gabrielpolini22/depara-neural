@@ -14,31 +14,31 @@
   --neon:#22c55e;
   --cyan:#38bdf8;
   --pink:#f472b6;
-  --text:#e5e7eb
+  --text:#e5e7eb;
 }
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
   font-family:Inter;
-  padding:30px
+  padding:30px;
 }
 h1{
   font-family:Orbitron;
   background:linear-gradient(90deg,var(--neon),var(--cyan));
   -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent
+  -webkit-text-fill-color:transparent;
 }
 .grid{
   display:grid;
   grid-template-columns:360px 1fr;
-  gap:20px
+  gap:20px;
 }
 .card{
   background:rgba(255,255,255,.06);
   border:1px solid var(--border);
   border-radius:20px;
-  padding:20px
+  padding:20px;
 }
 input,select,button{
   width:100%;
@@ -47,29 +47,29 @@ input,select,button{
   border-radius:10px;
   border:1px solid var(--border);
   background:#020617;
-  color:var(--text)
+  color:var(--text);
 }
 button{
   background:linear-gradient(90deg,var(--neon),var(--cyan));
   color:#020617;
   font-family:Orbitron;
-  cursor:pointer
+  cursor:pointer;
 }
 table{
   width:100%;
   border-collapse:collapse;
-  font-size:13px
+  font-size:13px;
 }
 th,td{
   padding:12px;
-  border-bottom:1px solid var(--border)
+  border-bottom:1px solid var(--border);
 }
 th{color:var(--cyan);text-align:left}
 .badge{
   padding:5px 12px;
   border-radius:999px;
   font-size:11px;
-  font-weight:700
+  font-weight:700;
 }
 .feito{background:rgba(34,197,94,.2);color:var(--neon)}
 .pendente{background:rgba(244,114,182,.2);color:var(--pink)}
@@ -93,7 +93,7 @@ tr.linha-pendente{background:rgba(244,114,182,.12)}
       <option>Pendente</option>
     </select>
     <input type="date" id="data">
-    <button id="btnSalvar">SALVAR</button>
+    <button onclick="salvar()">SALVAR</button>
   </div>
 
   <div class="card">
@@ -117,83 +117,68 @@ tr.linha-pendente{background:rgba(244,114,182,.12)}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* CONFIGURAÇÃO */
-function pedirConfig(){
-  const cfg = {
-    apiKey: prompt("Firebase apiKey"),
-    authDomain: prompt("Firebase authDomain"),
-    projectId: prompt("Firebase projectId"),
-    storageBucket: prompt("Firebase storageBucket"),
-    messagingSenderId: prompt("Firebase messagingSenderId"),
-    appId: prompt("Firebase appId")
-  };
-  localStorage.setItem("firebaseConfig", JSON.stringify(cfg));
-  return cfg;
-}
-
-const firebaseConfig =
-  JSON.parse(localStorage.getItem("firebaseConfig")) || pedirConfig();
+const firebaseConfig = JSON.parse(localStorage.getItem("firebaseConfig")) || {
+  apiKey: "COLE_AQUI",
+  authDomain: "COLE_AQUI",
+  projectId: "COLE_AQUI",
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ELEMENTOS */
 const codigo = document.getElementById("codigo");
 const produto = document.getElementById("produto");
 const molecula = document.getElementById("molecula");
 const statusEl = document.getElementById("status");
 const dataEl = document.getElementById("data");
 const lista = document.getElementById("lista");
-const btnSalvar = document.getElementById("btnSalvar");
 
-/* EVENTO */
-btnSalvar.addEventListener("click", salvar);
-
-/* SALVAR */
 async function salvar(){
-  if(!produto.value || !molecula.value || !dataEl.value) return;
+  if(!produto.value || !molecula.value || !dataEl.value){
+    alert("Preencha todos os campos");
+    return;
+  }
 
   await addDoc(collection(db,"depara"),{
-    codigo: codigo.value,
-    produto: produto.value,
-    molecula: molecula.value,
-    status: statusEl.value,
-    data: dataEl.value
+    codigo:codigo.value,
+    produto:produto.value,
+    molecula:molecula.value,
+    status:statusEl.value,
+    data:dataEl.value
   });
 
-  codigo.value = produto.value = molecula.value = dataEl.value = "";
-  statusEl.value = "Feito";
+  codigo.value="";
+  produto.value="";
+  molecula.value="";
+  dataEl.value="";
+  statusEl.value="Feito";
 
   render();
 }
 
-/* LISTAR */
 async function render(){
   lista.innerHTML="";
   const snap = await getDocs(collection(db,"depara"));
-
   snap.forEach(d=>{
-    const r = d.data();
-    const tr = document.createElement("tr");
-    tr.className = r.status === "Feito" ? "linha-feito" : "linha-pendente";
-
-    tr.innerHTML = `
-      <td>${r.codigo || ""}</td>
-      <td>${r.produto || ""}</td>
-      <td>${r.molecula || ""}</td>
+    const r=d.data();
+    const tr=document.createElement("tr");
+    tr.className = r.status==="Feito" ? "linha-feito" : "linha-pendente";
+    tr.innerHTML=`
+      <td>${r.codigo||""}</td>
+      <td>${r.produto}</td>
+      <td>${r.molecula}</td>
       <td><span class="badge ${r.status==="Feito"?"feito":"pendente"}">${r.status}</span></td>
-      <td>${r.data || ""}</td>
-      <td><button data-id="${d.id}">🗑️</button></td>
-    `;
-
-    tr.querySelector("button").addEventListener("click", async ()=>{
-      await deleteDoc(doc(db,"depara", d.id));
-      render();
-    });
-
+      <td>${r.data}</td>
+      <td><button onclick="del('${d.id}')">🗑️</button></td>`;
     lista.appendChild(tr);
   });
 }
+
+window.salvar = salvar;
+window.del = async id => {
+  await deleteDoc(doc(db,"depara",id));
+  render();
+};
 
 render();
 </script>
