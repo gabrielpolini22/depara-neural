@@ -2,63 +2,73 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>DE/PARA • Neural Registry</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Dashboard DE/PARA • Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --bg:#020617;
-  --border:rgba(255,255,255,.12);
-  --neon:#22c55e;
-  --cyan:#38bdf8;
-  --pink:#f472b6;
-  --text:#e5e7eb;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
 body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Inter,sans-serif;
+  background:radial-gradient(circle at top,#0f2027,#000);
+  color:#fff;
+  min-height:100vh;
   padding:30px;
 }
 
-h1{
-  font-family:Orbitron;
-  background:linear-gradient(90deg,var(--neon),var(--cyan));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
+h1{margin-bottom:20px}
+h1 span{color:#00f7ff}
 
-.grid{
+.dashboard{
   display:grid;
-  grid-template-columns:360px 1fr;
-  gap:20px;
+  grid-template-columns:2fr 1.3fr 1.3fr;
+  gap:25px;
 }
 
 .card{
-  background:rgba(255,255,255,.06);
-  border:1px solid var(--border);
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(14px);
   border-radius:20px;
   padding:20px;
+  box-shadow:0 0 25px rgba(0,247,255,0.12);
+  animation:fade .6s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.card h2{
+  margin-bottom:15px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.card span.badge{
+  background:#00f7ff;
+  color:#000;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:12px;
+}
+
+form{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-bottom:15px;
 }
 
 input,select,button{
-  width:100%;
-  margin-bottom:10px;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#020617;
-  color:var(--text);
+  padding:8px;
+  border-radius:8px;
+  border:none;
+  outline:none;
 }
 
 button{
-  background:linear-gradient(90deg,var(--neon),var(--cyan));
-  color:#020617;
-  font-family:Orbitron;
+  background:#00f7ff;
+  color:#000;
+  font-weight:700;
   cursor:pointer;
 }
 
@@ -68,163 +78,145 @@ table{
   font-size:13px;
 }
 
-th,td{
-  padding:12px;
-  border-bottom:1px solid var(--border);
-}
-
+th,td{padding:8px}
 th{
-  color:var(--cyan);
-  text-align:left;
+  color:#00f7ff;
+  border-bottom:1px solid rgba(255,255,255,.2);
 }
 
-.badge{
-  padding:5px 12px;
-  border-radius:999px;
+tbody tr:hover{
+  background:rgba(0,247,255,.08);
+}
+
+.status{
+  padding:4px 10px;
+  border-radius:12px;
   font-size:11px;
   font-weight:700;
 }
+.pendente{background:#ffb703;color:#000}
+.feito{background:#2ec4b6;color:#000}
 
-.feito{
-  background:rgba(34,197,94,.2);
-  color:var(--neon);
+.actions button{
+  padding:4px 8px;
+  font-size:11px;
+  margin-right:5px;
 }
-
-.pendente{
-  background:rgba(244,114,182,.2);
-  color:var(--pink);
-}
-
-tr.linha-feito{
-  background:rgba(34,197,94,.12);
-}
-
-tr.linha-pendente{
-  background:rgba(244,114,182,.12);
-}
-
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr}
-}
+.del{background:#ff006e;color:#fff}
 </style>
 </head>
 
 <body>
 
-<h1>NEURAL DE/PARA</h1>
+<h1>📊 Dashboard <span>DE/PARA</span> • Pricing</h1>
 
-<div class="grid">
-  <div class="card">
-    <input id="codigo" placeholder="Código">
-    <input id="produto" placeholder="Produto">
-    <input id="molecula" placeholder="Molécula">
-    <select id="status">
-      <option value="Feito">Feito</option>
-      <option value="Pendente">Pendente</option>
-    </select>
-    <input type="date" id="data">
-    <button id="btnSalvar" type="button">SALVAR</button>
-  </div>
+<div class="dashboard">
 
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>COD</th>
-          <th>PRODUTO</th>
-          <th>MOLÉCULA</th>
-          <th>STATUS</th>
-          <th>DATA</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="lista"></tbody>
-    </table>
-  </div>
+<!-- CONTROLE -->
+<div class="card">
+<h2>Controle <span class="badge">DE/PARA</span></h2>
+
+<form id="form">
+  <input id="cod" placeholder="COD" required>
+  <input id="produto" placeholder="Produto" required>
+  <input id="molecula" placeholder="Molécula" required>
+  <input id="data" type="date" required>
+  <select id="status">
+    <option>Pendente</option>
+    <option>Feito</option>
+  </select>
+  <button>Adicionar</button>
+</form>
+
+<table>
+<thead>
+<tr>
+<th>COD</th><th>Produto</th><th>Molécula</th><th>Data</th><th>Status</th><th>Ações</th>
+</tr>
+</thead>
+<tbody id="controle"></tbody>
+</table>
 </div>
 
-<script type="module">
-console.log("JS CARREGOU");
+<!-- FEITOS -->
+<div class="card">
+<h2>Feitos <span class="badge">OK</span></h2>
+<table>
+<thead><tr><th>Produto</th><th>Molécula</th></tr></thead>
+<tbody id="feitos"></tbody>
+</table>
+</div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<!-- PRIORIDADE -->
+<div class="card">
+<h2>Prioridade <span class="badge">🔥</span></h2>
+<table>
+<thead><tr><th>Produto</th><th>Molécula</th><th>Solicitante</th></tr></thead>
+<tbody id="prioridade">
+<tr><td>Insulina</td><td>Insulina</td><td>Comercial</td></tr>
+</tbody>
+</table>
+</div>
 
-/* 🔥 COLE A CONFIG DO FIREBASE AQUI 🔥 */
-const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_ID",
-  appId: "SEU_APP_ID"
-};
+</div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-const codigo   = document.getElementById("codigo");
-const produto  = document.getElementById("produto");
-const molecula = document.getElementById("molecula");
-const statusEl = document.getElementById("status");
-const dataEl   = document.getElementById("data");
-const lista    = document.getElementById("lista");
-const btnSalvar = document.getElementById("btnSalvar");
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyClN5np6SBVt1wPgHlyJCTd7Gm3TdK0Ctw",
+  authDomain: "dashboard-depara.firebaseapp.com",
+  projectId: "dashboard-depara",
+  storageBucket: "dashboard-depara.firebasestorage.app",
+  messagingSenderId: "915717630973",
+  appId: "1:915717630973:web:17a83cc103702a3be80794"
+});
+const db = firebase.firestore();
 
-/* ✅ BOTÃO FUNCIONANDO */
-btnSalvar.addEventListener("click", async () => {
-  console.log("BOTÃO CLICADO");
+const tbody = document.getElementById("controle");
+const feitos = document.getElementById("feitos");
+const form = document.getElementById("form");
 
-  if(!produto.value || !molecula.value || !dataEl.value){
-    alert("Preencha todos os campos obrigatórios");
-    return;
-  }
-
-  await addDoc(collection(db,"depara"),{
-    codigo: codigo.value,
-    produto: produto.value,
-    molecula: molecula.value,
-    status: statusEl.value,
-    data: dataEl.value
+form.addEventListener("submit",e=>{
+  e.preventDefault();
+  db.collection("controle").add({
+    cod:cod.value,
+    produto:produto.value,
+    molecula:molecula.value,
+    data:data.value,
+    status:status.value
   });
-
-  codigo.value="";
-  produto.value="";
-  molecula.value="";
-  dataEl.value="";
-  statusEl.value="Feito";
-
-  render();
+  form.reset();
 });
 
-/* 📥 RENDER */
-async function render(){
-  lista.innerHTML="";
-  const snap = await getDocs(collection(db,"depara"));
+db.collection("controle").onSnapshot(snap=>{
+  tbody.innerHTML="";
+  feitos.innerHTML="";
+  snap.forEach(doc=>{
+    const d=doc.data();
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${d.cod}</td>
+      <td>${d.produto}</td>
+      <td>${d.molecula}</td>
+      <td>${d.data}</td>
+      <td><span class="status ${d.status=="Feito"?"feito":"pendente"}">${d.status}</span></td>
+      <td class="actions">
+        <button class="del" onclick="del('${doc.id}')">X</button>
+      </td>`;
+    tbody.appendChild(tr);
 
-  snap.forEach(d=>{
-    const r = d.data();
-    const tr = document.createElement("tr");
-    tr.className = r.status === "Feito" ? "linha-feito" : "linha-pendente";
-
-    tr.innerHTML = `
-      <td>${r.codigo||""}</td>
-      <td>${r.produto}</td>
-      <td>${r.molecula}</td>
-      <td><span class="badge ${r.status==="Feito"?"feito":"pendente"}">${r.status}</span></td>
-      <td>${r.data}</td>
-      <td><button data-id="${d.id}">🗑️</button></td>
-    `;
-
-    tr.querySelector("button").addEventListener("click", async ()=>{
-      await deleteDoc(doc(db,"depara",d.id));
-      render();
-    });
-
-    lista.appendChild(tr);
+    if(d.status=="Feito"){
+      feitos.innerHTML+=`<tr><td>${d.produto}</td><td>${d.molecula}</td></tr>`;
+    }
   });
-}
+});
 
-render();
+function del(id){
+  db.collection("controle").doc(id).delete();
+}
 </script>
 
 </body>
